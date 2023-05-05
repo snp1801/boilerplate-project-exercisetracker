@@ -16,12 +16,16 @@ const userSchema = new Schema({
 var User = mongoose.model('User', userSchema)
 
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
+
+app.get("/test", (req, res) => {
+  res.json({greet : "Working"})
+})
 
 app.post('/api/users', (req,res) => {
   // const user = req.body.username
@@ -33,6 +37,16 @@ app.post('/api/users', (req,res) => {
     res.json({userName: data.userName, _id: data._id})
   })
 })
+app.get('/api/users', (req, res) => {
+  User.find({}, (err, users) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: err });
+    }
+    return res.json(users);
+  });
+});
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)

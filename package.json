@@ -16,6 +16,7 @@
 		"url": "https://github.com/freeCodeCamp/boilerplate-project-exercisetracker"
 	},
 	"license": "MIT",
+	"type": "commonjs",
 	"keywords": [
 		"node",
 		"express"
