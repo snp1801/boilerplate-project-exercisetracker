@@ -12,11 +12,16 @@ var Schema = mongoose.Schema
 const userSchema = new Schema({
   userName: {
     type : String,
-    required : true
+    required : true,
+    unique: true
   }
 });
 
 const logSchema = new Schema({
+  userName: {
+    type: String,
+    required: true
+  },
   description: {
     type: String, required: true
   },
@@ -62,6 +67,8 @@ app.get('/api/users', (req, res) => {
     return res.json(users);
   });
 });
+
+
 app.post('/api/users/:_id/exercises', (req, res) => {
   const { description, duration, date = new Date() } = req.body;
   const id = req.params._id;
@@ -73,21 +80,42 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   const formattedDate = `${dayOfWeek} ${month} ${dayOfMonth} ${year}`;
   User.findById(id, (err, user) => {
     // const user_n = user.userName;
+    const uName = user.userName;
     if (err) return console.log(err);
-    var arr = { "description": description, "duration": duration, "date": formattedDate }
+    var arr = { 'userName': uName,  "description": description, "duration": duration, "date": formattedDate }
+    console.log(arr);
     const curr_log = new Log( arr )
     // console.log(curr_log);
     curr_log.save((err, data) => {
       if (err) return res.json({error: err})
       // data["_id"] = id;
       // data["userName"] = user.userName;
-      // console.log(data)
+      console.log(data)
       // res.json(data)
     })
-    console.log(user)
+    // console.log(user)
     arr["_id"] = id;
-    arr["userName"] = user.userName;
     res.json(arr)
+  })
+})
+
+
+app.get('/api/users/:_id/logs', (req, res) => {
+  const ID = req.params._id;
+  User.findById(ID, (err, user) => {
+    const uName = user.userName;
+    if (err) return console.log(err);
+    Log.find({"userName": uName}, (err, logs) => {
+      if (err) return console.log(err);
+      const out = []
+      for (let i=0; i<logs.length; i++){
+        const arr = {"description":logs[i].description, "duration": logs[i].duration, "date": logs[i].date}
+        out.push(arr)
+        // console.log(logs[i].description)
+      }
+      // console.log(out)
+      res.json({'_id': ID, 'userName': uName,'count': out.length,'logs':out})
+    })
   })
 })
 
